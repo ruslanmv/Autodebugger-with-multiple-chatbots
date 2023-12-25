@@ -5,21 +5,20 @@ from utils import *
 import base64
 
 def run_code(code):
-    try:
-        output = subprocess.check_output(["python", "-c", code])
-        return True, output.decode("utf-8")
-    except subprocess.CalledProcessError as e:
-        return False, e.output.decode("utf-8")
+    result = subprocess.run(["python", "-c", code], capture_output=True, text=True)
+    if result.returncode == 0:
+        return True, result.stdout
+    else:
+        return False, result.stderr  
 
 st.title("Auto Error Debugger Assistant with WatsonX")
 
 code_input = st.text_area("Paste your code here:", height=200)
+max_attempts = st.slider("Select maximum number of attempts", 1, 10, 3)
+run_option = st.selectbox("Local Run Code:", ("Yes", "No"))
 fixed_code = st.empty()
 output_zone = st.empty()
 
-max_attempts = st.slider("Select maximum number of attempts", 1, 10, 3)
-
-run_option = st.selectbox("Local Run Code:", ("Yes", "No"))
 
 log_data = []
 
@@ -28,6 +27,7 @@ if st.button("Debug and Run"):
         code = code_input
         attempt = 1
         success = False
+        error = ""  # Initialize the error variable
         while success == False and attempt <= max_attempts:
             output_zone.write(f"Attempt {attempt}: Running code...")
             success, output = run_code(code)
@@ -45,6 +45,9 @@ if st.button("Debug and Run"):
                 output_zone.write("Trying again with the fixed code...")
                 success, output = run_code(code)
                 output_zone.write(f"Code executed successfully.\nOutput: {output}")
+                fixed_code.write("Suggested code:")
+                st.markdown("#### Attempt "+str(attempt))
+                st.code(code, language='python')
                 log_data.append([attempt, code_input, code, error, success])
                 attempt += 1
     else:
