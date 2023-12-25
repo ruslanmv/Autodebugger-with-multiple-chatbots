@@ -51,32 +51,16 @@ llm_model = Model(
 )
 
 
-def generate_code(code, language, error):
+def generate_code(code, language):
     code_prompts = []
     code_prompt = f"""You are given a code snippet in {language} that contains syntax errors and logical issues. 
     Your task is to fix the code and provide the corrected version as the final result. 
     You should not provide any explanation or additional information; only the fixed code should be included in your response."""
-
-    if error:
-    
-        inst_prompt = f"""<s>[INST] <<SYS>> 
-            {code_prompt}
-            <</SYS>> 
-            The following is input code: {code}.
-            The error is: {error}
-            [/INST]  Answer only in {language} code:"""
-        print("Prompt with error")
-    else:
-        
-        inst_prompt = f"""<s>[INST] <<SYS>> 
-            {code_prompt}
-            <</SYS>> 
-            The following is input code: {code}.
-            [/INST]  Answer only in {language} code: """
-        print("Prompt with no error")
+    inst_prompt = f"""<s>[INST] <<SYS>> 
+        {code_prompt}
+        <</SYS>> The following input code: {code}
+        [/INST]  Answer only in  {language} code: :"""
     code_prompts.append(inst_prompt)
-    
-    logging.info("The code prompt is : {code_prompts}")
     logging.info("Sending prompt for code")
     result = llm_model.generate(
         code_prompts
@@ -89,5 +73,5 @@ def generate_code(code, language, error):
 
 def get_chatbot_suggestion(error, code):
     # Generate code fix using CodeGenerator
-    generated_code = generate_code(code, "Python", error)
+    generated_code = generate_code(code, "Python")
     return generated_code

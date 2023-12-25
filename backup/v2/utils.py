@@ -75,8 +75,6 @@ def generate_code(code, language, error):
             [/INST]  Answer only in {language} code: """
         print("Prompt with no error")
     code_prompts.append(inst_prompt)
-    
-    logging.info("The code prompt is : {code_prompts}")
     logging.info("Sending prompt for code")
     result = llm_model.generate(
         code_prompts
